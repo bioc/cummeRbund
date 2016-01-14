@@ -22,14 +22,14 @@ setMethod("initialize","CuffData",
 						filters = filters,
 						type = type,
 						idField = idField,
-						...)				
+						...)
 		}
 )
 
 setValidity("CuffData",function(object){
 		TRUE
 		}
-)			
+)
 
 ################
 #Class Methods
@@ -120,7 +120,7 @@ setMethod("replicates","CuffData",.replicates)
 	}
 	sampleString<-substr(sampleString,1,nchar(sampleString)-1)
 	sampleString<-paste(sampleString,")",sep="")
-	
+
 	if(!features){
 		FPKMQuery<-paste("SELECT * FROM ",object@tables$dataTable," WHERE sample_name IN ",sampleString,sep="")
 	}else{
@@ -153,7 +153,7 @@ setMethod("fpkm","CuffData",.fpkm)
 	}
 	sampleString<-substr(sampleString,1,nchar(sampleString)-1)
 	sampleString<-paste(sampleString,")",sep="")
-	
+
 	if(!features){
 		FPKMQuery<-paste("SELECT * FROM ",object@tables$replicateTable," WHERE rep_name IN ",sampleString,sep="")
 	}else{
@@ -162,7 +162,7 @@ setMethod("fpkm","CuffData",.fpkm)
 	#print(FPKMQuery)
 	res<-dbGetQuery(object@DB,FPKMQuery)
 	res$rep_name<-factor(res$rep_name,levels=getRepLevels(object))
-	#res$stdev<-(res$conf_hi-res$fpkm)/2 #Not really available yet since conf_hi and conf_lo are not 
+	#res$stdev<-(res$conf_hi-res$fpkm)/2 #Not really available yet since conf_hi and conf_lo are not
 	res
 }
 
@@ -186,13 +186,13 @@ setMethod("repFpkm","CuffData",.repFpkm)
 	}
 	sampleString<-substr(sampleString,1,nchar(sampleString)-1)
 	sampleString<-paste(sampleString,")",sep="")
-	
+
 	CountQuery<-FPKMQuery<-paste("SELECT * FROM ",object@tables$countTable," WHERE sample_name IN ",sampleString,sep="")
-	
+
 	res<-dbGetQuery(object@DB,CountQuery)
 	res$sample_name<-factor(res$sample_name,levels=getLevels(object))
 	res
-	
+
 }
 
 setMethod("count","CuffData",.count)
@@ -209,7 +209,7 @@ setMethod("count","CuffData",.count)
 	}else{
 		myLevels<-getLevels(object)
 	}
-	
+
 	samp<-samples(object)
 	FPKMMatQuery<-paste("select x.",object@idField,", x.gene_short_name, ",sep="")
 	for (i in samp){
@@ -221,9 +221,9 @@ setMethod("count","CuffData",.count)
 	if(fullnames){
 		res<-data.frame(res[,-c(1,2)],row.names=paste(res[,2],res[,1],sep="|"))
 	}else{
-		res<-data.frame(res[,-c(1,2)],row.names=res[,1])	
+		res<-data.frame(res[,-c(1,2)],row.names=res[,1])
 	}
-	
+
 	if(!missing(sampleIdList)){
 		res<-data.frame(res[,sampleIdList],row.names=rownames(res))
 		colnames(res)<-sampleIdList
@@ -244,7 +244,7 @@ setMethod("fpkmMatrix","CuffData",.fpkmMatrix)
 	}else{
 		myLevels<-getRepLevels(object)
 	}
-	
+
 	samp<-replicates(object)
 	FPKMMatQuery<-paste("select x.",object@idField,", x.gene_short_name, ",sep="")
 	for (i in samp){
@@ -257,7 +257,7 @@ setMethod("fpkmMatrix","CuffData",.fpkmMatrix)
 	if(fullnames){
 		res<-data.frame(res[,-c(1,2)],row.names=paste(res[,2],res[,1],sep="|"))
 	}else{
-		res<-data.frame(res[,-c(1,2)],row.names=res[,1])	
+		res<-data.frame(res[,-c(1,2)],row.names=res[,1])
 	}
 	if(!missing(repIdList)){
 		res<-data.frame(res[,repIdList],row.names=rownames(res))
@@ -279,7 +279,7 @@ setMethod("repFpkmMatrix","CuffData",.repFpkmMatrix)
 	}else{
 		myLevels<-getLevels(object)
 	}
-	
+
 	samp<-samples(object)
 	CountMatQuery<-paste("select x.",object@idField,", x.gene_short_name, ",sep="")
 	for (i in samp){
@@ -291,7 +291,7 @@ setMethod("repFpkmMatrix","CuffData",.repFpkmMatrix)
 	if(fullnames){
 		res<-data.frame(res[,-c(1,2)],row.names=paste(res[,2],res[,1],sep="|"))
 	}else{
-		res<-data.frame(res[,-c(1,2)],row.names=res[,1])	
+		res<-data.frame(res[,-c(1,2)],row.names=res[,1])
 	}
 	if(!missing(sampleIdList)){
 		res<-data.frame(res[,sampleIdList],row.names=rownames(res))
@@ -324,7 +324,7 @@ setMethod("countMatrix","CuffData",.countMatrix)
 	if(fullnames){
 		res<-data.frame(res[,-c(1,2)],row.names=paste(res[,2],res[,1],sep="|"))
 	}else{
-		res<-data.frame(res[,-c(1,2)],row.names=res[,1])	
+		res<-data.frame(res[,-c(1,2)],row.names=res[,1])
 	}
 	if(!missing(repIdList)){
 		res<-data.frame(res[,repIdList],row.names=rownames(res))
@@ -393,7 +393,7 @@ setMethod("diffTable",signature(object="CuffData"),.diffTable)
 		sql<-paste("SELECT x.",object@idField,", sum(case when x.sample_name = '",x,"' then x.fpkm end) AS 'x', sum(case when x.sample_name = '",y,"' then x.fpkm end) AS 'y' FROM ",object@tables$dataTable," x GROUP BY x.",object@idField,";",sep="")
 		#print(sql)
 		dat<-dbGetQuery(object@DB,sql)
-		
+
 		if(logMode){
 			dat$x<-log10(dat$x+pseudocount)
 			dat$y<-log10(dat$y+pseudocount)
@@ -411,7 +411,7 @@ setMethod("diffTable",signature(object="CuffData"),.diffTable)
 	}else{
 		sql<-paste("SELECT x.",object@idField,", sum(case when x.sample_name = '",x,"' then x.count end) AS 'x', sum(case when x.sample_name = '",y,"' then x.count end) AS 'y' FROM ",object@tables$countTable," x GROUP BY x.",object@idField,";",sep="")
 		dat<-dbGetQuery(object@DB,sql)
-		
+
 		if(logMode){
 			dat$x<-log10(dat$x+pseudocount)
 			dat$y<-log10(dat$y+pseudocount)
@@ -427,7 +427,7 @@ setMethod("diffTable",signature(object="CuffData"),.diffTable)
 #	if (missing(x) || missing(y)){
 #		stop("You must supply both x and y.")
 #	}else{
-#		
+#
 #	}
 #}
 
@@ -516,12 +516,12 @@ setMethod("getRepLevels",signature(object="CuffData"),.getRepLevels)
 		}else{
 			p<-p+geom_density(aes(x=fpkm,group=condition,color=condition,fill=condition),alpha=I(1/3))
 		}
-	
+
 	p<-p + labs(title=object@tables$mainTable)
-	
+
 	#Default cummeRbund colorscheme
 	p<-p + scale_fill_hue(l=50,h.start=200) + scale_color_hue(l=50,h.start=200)
-	
+
 	#TODO: Add label callout
 	p
 }
@@ -531,33 +531,33 @@ setMethod("csDensity",signature(object="CuffData"),.density)
 .scatter<-function(object,x,y,logMode=TRUE,pseudocount=1.0,labels,smooth=FALSE,colorByStatus=FALSE, drawRug=TRUE, ...){
 	dat<-fpkmMatrix(object,fullnames=TRUE)
 	samp<-samples(object)
-	
+
 	#check to make sure x and y are in samples
 	if (!all(c(x,y) %in% samp)){
 		stop("One or more values of 'x' or 'y' are not valid sample names!")
 	}
-	
+
 	#add pseudocount if necessary
 	if(logMode){
 		for (i in samp){
 			dat[[i]]<-dat[[i]]+pseudocount
 		}
 	}
-	
+
 	#Attach tracking_id and gene_short_name
 	if(!missing(labels)){
 		require(stringr)
 		tracking<-str_split_fixed(rownames(dat),"\\|",2)
 		dat$gene_short_name<-tracking[,1]
 		dat$tracking_id<-tracking[,2]
-		
+
 		labeled.dat<-dat[dat$gene_short_name %in% labels,]
 	}
-	
+
 	#make plot object
 	p<-ggplot(dat)
 	p<- p + aes_string(x=x,y=y)
-	
+
 	#Right now, this does nothing, because 'significant' is not returned from fpkmMatrix object so I don't have this as a feature to draw
 	if(colorByStatus){
 		p<- p + geom_point(size=1.2,alpha=I(1/3))
@@ -565,29 +565,29 @@ setMethod("csDensity",signature(object="CuffData"),.density)
 		p<- p + geom_point(size=1.2,alpha=I(1/3))
 	}
 	#Add symmetry line
-	p<- p + geom_abline(intercept=0,slope=1,linetype=2) 
-	
+	p<- p + geom_abline(intercept=0,slope=1,linetype=2)
+
 	#Add rug
 	if(drawRug){
 		p<- p + geom_rug(size=0.8,alpha=0.01)
 	}
-	
+
 	#add smoother
 	if(smooth){
 		p <- p + stat_smooth(method="lm",fill="blue",alpha=0.2)
 	}
-	
+
 	#Add highlights from labels
 	if(!missing(labels)){
 		p <- p + geom_point(data=labeled.dat,aes_string(x=x,y=y),size=1.3,color="red")
 		p <- p + geom_text(data=labeled.dat,aes_string(x=x,y=y,label='gene_short_name'),color="red",hjust=0,vjust=0,angle=0,size=4)
 	}
-	
+
 	#logMode
 	if(logMode){
 		p <- p + scale_y_log10() + scale_x_log10()
 	}
-	
+
 	#Add title & Return value
 	p<- p + labs(title=object@tables$mainTable)
 	p
@@ -597,21 +597,21 @@ setMethod("csScatter",signature(object="CuffData"), .scatter)
 
 .scatter2<-function(object,x,y,logMode=TRUE,pseudocount=1.0,labels,smooth=FALSE,alpha=0.05,colorByStatus=FALSE, drawRug=TRUE, ...){
 	samp<-samples(object)
-	
+
 	#check to make sure x and y are in samples
 	if (!all(c(x,y) %in% samp)){
 		stop("One or more values of 'x' or 'y' are not valid sample names!")
 	}
-	
+
 	#Setup query string
 	sampleList<-paste("('",x,"','",y,"')",sep="")
-	
+
 	scatterQuery<-paste("SELECT m.gene_short_name,d.",object@idField,",sum(CASE WHEN d.sample_name='",x,"' THEN d.fpkm END) as x,sum(CASE WHEN d.sample_name='",y,"' THEN d.fpkm END) as y, edd.status, edd.p_value, edd.q_value FROM ",object@tables$mainTable," m LEFT JOIN ",object@tables$dataTable," d ON m.",object@idField,"=d.",object@idField," LEFT JOIN ",object@tables$expDiffTable," edd ON m.",object@idField," = edd.",object@idField," WHERE (edd.sample_1 in ",sampleList," AND (edd.sample_2 in ",sampleList,")) GROUP BY d.",object@idField,";",sep="")
 	#write(scatterQuery,stderr())
-	
+
 	#Retrieve data
 	dat<-dbGetQuery(object@DB,scatterQuery)
-	
+
 	#add pseudocount if necessary
 	if(logMode){
 		for (i in samp){
@@ -619,21 +619,21 @@ setMethod("csScatter",signature(object="CuffData"), .scatter)
 			dat$y<-dat$y+pseudocount
 		}
 	}
-	
+
 	#Flag significant genes
 	dat$significant<-"no"
 	dat$significant[dat$q_value<=alpha]<-"yes"
 	dat$significant<-factor(dat$significant,levels=c("no","yes"))
-	
+
 	#Attach tracking_id and gene_short_name
 	if(!missing(labels)){
 		labeled.dat<-dat[dat$gene_short_name %in% labels,]
 	}
-	
+
 	#make plot object
 	p<-ggplot(dat) + theme_bw()
 	p<- p + aes_string(x='x',y='y')
-	
+
 	#Right now, this does nothing, because 'significant' is not returned from fpkmMatrix object so I don't have this as a feature to draw
 	if(colorByStatus){
 		p<- p + geom_point(aes(color=significant),size=1.2) + scale_color_manual(values=c("black","red"))
@@ -641,29 +641,29 @@ setMethod("csScatter",signature(object="CuffData"), .scatter)
 		p<- p + geom_point(size=1.2,alpha=I(1/3))
 	}
 	#Add symmetry line
-	p<- p + geom_abline(intercept=0,slope=1,linetype=2) 
-	
+	p<- p + geom_abline(intercept=0,slope=1,linetype=2)
+
 	#Add rug
 	if(drawRug){
 		p<- p + geom_rug(size=0.8,alpha=0.01)
 	}
-	
+
 	#add smoother
 	if(smooth){
 		p <- p + stat_smooth(method="lm",fill="blue",alpha=0.2)
 	}
-	
+
 	#Add highlights from labels
 	if(!missing(labels)){
 		p <- p + geom_point(data=labeled.dat,aes_string(x='x',y='y'),size=1.3,color="red")
 		p <- p + geom_text(data=labeled.dat,aes_string(x='x',y='y',label='gene_short_name'),color="red",hjust=0,vjust=0,angle=0,size=4)
 	}
-	
+
 	#logMode
 	if(logMode){
 		p <- p + scale_y_log10() + scale_x_log10()
 	}
-	
+
 	#Add title & Return value
 	p<- p + labs(title=object@tables$mainTable,x=x,y=y)
 	p
@@ -688,7 +688,7 @@ setMethod("csScatter",signature(object="CuffData"), .scatter)
 	{
 		dat<-dat+pseudocount
 	}
-	
+
 	if(useCounts){
 		myLab = "Normalized Counts"
 	}else{
@@ -700,29 +700,29 @@ setMethod("csScatter",signature(object="CuffData"), .scatter)
 	}else{
 		p <- .plotmatrix(dat,hexbin=hexbin,...)
 	}
-	
+
 	p<- p + geom_abline(intercept=0,slope=1,linetype=2)
-	
+
 	p <- p + theme_bw() + ylab(myLab) + xlab(myLab)
-	
+
 	#p<- p + aes(alpha=0.01)
-	
+
 	p
-	
+
 }
 
 setMethod("csScatterMatrix",signature(object="CuffData"),.scatterMat)
 
 .volcano<-function(object,x,y,alpha=0.05,showSignificant=TRUE,features=FALSE,xlimits=c(-20,20),...){
 	samp<-samples(object)
-	
+
 	#check to make sure x and y are in samples
 	if (!all(c(x,y) %in% samp)){
 		stop("One or more values of 'x' or 'y' are not valid sample names!")
 	}
-	
+
 	dat<-diffData(object=object,features=features)
-	
+
 	#subset dat for samples of interest
 	mySamples<-c(x,y)
 	dat<-dat[(dat$sample_1 %in% mySamples & dat$sample_2 %in% mySamples),]
@@ -730,7 +730,7 @@ setMethod("csScatterMatrix",signature(object="CuffData"),.scatterMat)
 	dat$significant[dat$q_value<=alpha]<-'yes'
 	s1<-unique(dat$sample_1)
 	s2<-unique(dat$sample_2)
-	
+
 	p<-ggplot(dat)
 	if(showSignificant==FALSE){
 		p<- p + geom_point(aes(x=log2_fold_change,y=-log10(p_value)),size=1.2)
@@ -741,14 +741,14 @@ setMethod("csScatterMatrix",signature(object="CuffData"),.scatterMat)
 	p<- p + theme_bw()
 	p<- p + labs(title=paste(object@tables$mainTable,": ",s2,"/",s1,sep=""))
 	p<- p + scale_colour_manual(values = c("black","red"))
-	
+
 	#Set axis limits
 	p<- p + scale_x_continuous(limits=xlimits)
-	
-	p <- p + xlab(bquote(paste(log[2],"(fold change)",sep=""))) + 
+
+	p <- p + xlab(bquote(paste(log[2],"(fold change)",sep=""))) +
 	    ylab(bquote(paste(-log[10],"(p value)",sep="")))
 	p
-	
+
 }
 
 setMethod("csVolcano",signature(object="CuffData"), .volcano)
@@ -758,30 +758,30 @@ setMethod("csVolcano",signature(object="CuffData"), .volcano)
 	part1<-dat[,c('sample_1','sample_2','value_1','value_2','test_stat','p_value','q_value')]
 	part2<-data.frame(sample_1=part1$sample_2,sample_2=part1$sample_1,value_1=part1$value_2,value_2=part1$value_1,test_stat=-part1$test_stat,p_value=part1$p_value,q_value=part1$q_value)
 	dat<-rbind(part1,part2)
-	
+
 	myLevels<-union(dat$sample_1,dat$sample_2)
 	dat$sample_1<-factor(dat$sample_1,levels=myLevels)
 	dat$sample_2<-factor(dat$sample_2,levels=myLevels)
 	dat$log2_fold_change<-log2(dat$value_2/dat$value_1)
-	
+
 	#Set significance value
 	dat$significant<-"no"
 	dat$significant[dat$q_value<=alpha]<-"yes"
-	
+
 	#May need to expand filler for time-series data (when there aren't always all pairwise comparisons on which to facet
 	filler<-data.frame(sample_1=factor(myLevels,levels=myLevels),sample_2=factor(myLevels,levels=myLevels),label="")
 	filler$label<-as.character(filler$label)
 	mapping <- defaults(mapping, aes_string(x = "log2_fold_change", y = "-log10(p_value)", color="significant"))
 	class(mapping) <- "uneval"
-	
+
 	p <-ggplot(dat) + geom_point(mapping,na.rm=TRUE,size=0.8) + scale_colour_manual(values = c("black","red")) + facet_grid(sample_1~sample_2)
-	
-	p<- p + geom_vline(aes(x=0),linetype=2)
-	
+
+	p<- p + geom_vline(aes(xintercept=0),linetype=2)
+
 	p <- p + theme_bw() + xlab(bquote(paste(log[2],"(fold change)",sep=""))) + ylab(bquote(paste(-log[10],"(p value)",sep="")))
 
 	p
-	
+
 }
 
 setMethod("csVolcanoMatrix",signature(object="CuffData"),.volcanoMatrix)
@@ -793,40 +793,40 @@ setMethod("csVolcanoMatrix",signature(object="CuffData"),.volcanoMatrix)
 	}else{
 		obj.fpkm<-fpkmMatrix(object,fullnames=T)
 	}
-	
+
 	if(samples.not.genes) {
 		obj.fpkm.pos = obj.fpkm[rowSums(obj.fpkm)>0,]
 	} else {
 		obj.fpkm = t(obj.fpkm)
 		obj.fpkm.pos = obj.fpkm[,colSums(obj.fpkm)>0]
 	}
-	
+
 	if(logMode) {
 		obj.fpkm.pos = log10(obj.fpkm.pos+pseudocount)
 	}
-	
+
 	# compute distances
 	obj.dists = JSdist(makeprobs(obj.fpkm.pos))
-	
+
 	# cluster to order
 	obj.hc = hclust(obj.dists)
-	
+
 	# make data frame
 	dist.df = melt(as.matrix(obj.dists),varnames=c("X1","X2"))
 	dist.df$value<-as.numeric(format(dist.df$value,digits=sigDigits))
 	# initialize
 	g = ggplot(dist.df, aes(x=X1, y=X2, fill=value))
-	
+
 	# draw
 	labels = labels(obj.dists)
 	g = g + geom_tile(color="black") + scale_x_discrete("", limits=labels[obj.hc$order]) + scale_y_discrete("", limits=labels[obj.hc$order])
-	
+
 	# roll labels
 	g = g + theme(axis.text.x=element_text(angle=-90, hjust=0), axis.text.y=element_text(angle=0, hjust=1))
-	
+
 	# drop grey panel background and gridlines
 	g = g + theme(panel.grid.minor=element_line(colour=NA), panel.grid.major=element_line(colour=NA), panel.background=element_rect(fill=NA, colour=NA))
-	
+
 	# adjust heat scale
 	if (length(heatscale) == 2) {
 		g = g + scale_fill_gradient(low=heatscale[1], high=heatscale[3], name="JS Distance")
@@ -864,10 +864,10 @@ setMethod("csDistHeat", signature("CuffData"), .distheat)
 		p<-p+geom_boxplot(aes(x=condition,y=fpkm,fill=condition),alpha=I(1/3),size=0.3)
 	}
 	p<- p + theme(axis.text.x=element_text(angle=-90, hjust=0))
-	
+
 	#Default cummeRbund colorscheme
 	p<-p + scale_fill_hue(l=50,h.start=200)
-	
+
 	p
 }
 
@@ -884,7 +884,7 @@ setMethod("csBoxplot",signature(object="CuffData"),.boxplot)
 	}
 	res<-JSdist(makeprobs(fpkmMat))
 	#colnames(res)<-colnames(fpkmMat)
-	
+
 	#res<-as.dist(res)
 	res<-as.dendrogram(hclust(res))
 	plot(res,main=paste("All",deparse(substitute(object)),sep=" "),...)
@@ -901,14 +901,14 @@ setMethod("csDendro",signature(object="CuffData"),.dendro)
 	}
 	p<-ggplot(dat)
 	p<-p+geom_point(aes(x=A,y=log2(M)),size=0.8)
-	
+
 	#add smoother
 	if(smooth){
 		p <- p + stat_smooth(aes(x=A,y=log2(M)),fill="blue")
 	}
 	#add baseline
 	p <- p + geom_hline(yintercept=0)
-	
+
 	p
 }
 
@@ -930,7 +930,7 @@ setMethod("dispersionPlot",signature(object="CuffData"),.dispersionPlot)
 	}else{
 		dat<-fpkmMatrix(object)
 	}
-	
+
 	if(logMode){
 		dat<-log10(dat+pseudocount)
 	}
@@ -957,7 +957,7 @@ setMethod("MDSplot",signature(object="CuffData"),.MDSplot)
 	dat <- data.frame(obsnames=row.names(PC$x), PC$x)
 	#dat$shoutout<-""
 	#dat$shoutout[matchpt(PC$rotation,PC$x)$index]<-rownames(pca$x[matchpt(pca$rotation,pca$x)$index,])
-	plot <- ggplot(dat, aes_string(x=x, y=y)) 
+	plot <- ggplot(dat, aes_string(x=x, y=y))
 	if(showPoints){
 		plot<- plot + geom_point(alpha=.4, size=0.8, aes(label=obsnames))
 	}
@@ -971,8 +971,8 @@ setMethod("MDSplot",signature(object="CuffData"),.MDSplot)
 			v1 = .7 * mult * (get(x)),
 			v2 = .7 * mult * (get(y))
 	)
-	plot <- plot + 
-			#coord_equal() + 
+	plot <- plot +
+			#coord_equal() +
 			geom_text(data=datapc, aes(x=v1, y=v2, label=varnames,color=varnames), vjust=1)
 	plot <- plot + geom_segment(data=datapc, aes(x=0, y=0, xend=v1, yend=v2,color=varnames), arrow=arrow(length=unit(0.2,"cm")), alpha=0.75) + theme_bw()
 	plot
@@ -990,8 +990,8 @@ setMethod('PCAplot',signature(object="CuffData"),.PCAplot)
 	p<-p + 	geom_smooth(aes(x=log10(fpkm),y=log10(CV),color=sample_name)) +
 	#p<-p + 	geom_point(aes(x=log10(fpkm),y=log10(count),color=-log10(CV))) +
 	#p<-p + 	geom_point(aes(x=log10(fpkm),y=log2(fpkm/count),color=-log10(CV))) + geom_hline(aes(0),linetype=2) +
-			#facet_wrap('sample_name') + 
-			geom_abline(intercept=0,slope=1,linetype=2,size=0.3) + 
+			#facet_wrap('sample_name') +
+			geom_abline(intercept=0,slope=1,linetype=2,size=0.3) +
 			scale_color_gradient(name="%CV",low="darkblue",high="white",limits=c(0,percentCutoff), na.value = "white") +
 			labs(title=object@type)
 	p
@@ -1015,13 +1015,13 @@ setMethod('PCAplot',signature(object="CuffData"),.PCAplot)
 	colnames(dat)[1]<-"tracking_id"
 	dat<-dat[,c('tracking_id','sample_name','fpkm')]
 	dat<-dat[dat$fpkm>0,]
-	
+
 	if(showPool){
 		subsetCols<-c('tracking_id')
 	}else{
 		subsetCols<-c('tracking_id','sample_name')
 	}
-	
+
 	#Option 3 (tapply on log10(replicateFPKM) values)
 	dat.means<-tapply(dat$fpkm,dat[,subsetCols],function(x){mean(x,na.rm=T)})
 	dat.sd<-tapply(dat$fpkm,dat[,subsetCols],function(x){sd(x,na.rm=T)})
@@ -1038,7 +1038,7 @@ setMethod('PCAplot',signature(object="CuffData"),.PCAplot)
 	if(!showPool){
 		dat$sample_name<-factor(dat$sample_name,levels=samples(object))
 	}
-	
+
 	p <-ggplot(dat,aes(x=fpkm,y=(stdev/fpkm)^2),na.rm=T)
 	#p <-ggplot(dat,aes(x=log10(fpkm+1),y=log10(stdev)),na.rm=T)
 	if(showPool){
@@ -1052,7 +1052,7 @@ setMethod('PCAplot',signature(object="CuffData"),.PCAplot)
 		 xlab(bquote(paste(log[10],"FPKM",sep=" "))) +
 		 theme_bw() + xlim(c(log10(FPKMLowerBound),max(log10(dat$fpkm)))) + labs(title=object@type)
 	p
-	
+
 }
 
 setMethod("fpkmSCVPlot",signature(object="CuffData"),.fpkmSCVPlot)
@@ -1084,7 +1084,7 @@ setMethod("fpkmSCVPlot",signature(object="CuffData"),.fpkmSCVPlot)
 				JSdistFromP(fpkms,q)
 			})
 	colnames(res)<-paste(colnames(fpkms),"_spec",sep="")
-	
+
 	if(relative){
 		res<-res/max(res)
 	}
@@ -1100,18 +1100,18 @@ setMethod("csSpecificity",signature(object="CuffData"),.specificity)
 .nmf<-function(object,k,logMode=T,pseudocount=1,maxiter=1000,replicates=FALSE,fullnames=FALSE){
 	require(NMFN)
 	if(missing(k)) stop("Please provide a rank value for factorization (arg=k)")
-	
+
 	if(replicates){
 		m=repFpkmMatrix(object,fullnames=fullnames)
 	}else{
 		m=fpkmMatrix(object,fullnames=fullnames)
 	}
-	
-	if(logMode) 
+
+	if(logMode)
 	{
 		m = log10(m+pseudocount)
 	}
-	
+
 	myNMF<-nnmf(m,k=k,maxiter=maxiter)
 	return (myNMF)
 }
@@ -1157,7 +1157,7 @@ setMethod("csNMF",signature(object="CuffData"),.nmf)
 	#Remove rows with "NA" for gene_short_name
 	res<-res[!is.na(res$gene_short_name),]
 	#Write to file
-	write.table(res,file=filename,sep="\t",quote=F,...,row.names=F,col.names=F)	
+	write.table(res,file=filename,sep="\t",quote=F,...,row.names=F,col.names=F)
 }
 
 .makeRnkTestStat<-function(object,x,y,filename,...){
@@ -1221,9 +1221,8 @@ setMethod("makeRnk",signature(object="CuffData"),.makeRnkTestStat)
 
 #.volcanoMatrix <- function(data){
 #	densities <- do.call('rbind',lapply(1:))
-#	p <-ggplot(data) + facet_grid(sample1~sample2,scales="free") + geom_point(aes(x=log2_fold_change,y=-log10(p_value))) + stat_density(aes(x = log2_fold_change, 
-#					y = ..scaled.. * diff(range(log2_fold_change)) + min(log2_fold_change)), data = densities, 
+#	p <-ggplot(data) + facet_grid(sample1~sample2,scales="free") + geom_point(aes(x=log2_fold_change,y=-log10(p_value))) + stat_density(aes(x = log2_fold_change,
+#					y = ..scaled.. * diff(range(log2_fold_change)) + min(log2_fold_change)), data = densities,
 #			position = "identity", colour = "grey20", geom = "line")
-#	
+#
 #}
-
