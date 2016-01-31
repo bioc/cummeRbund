@@ -776,7 +776,7 @@ setMethod("csVolcano",signature(object="CuffData"), .volcano)
 
 	p <-ggplot(dat) + geom_point(mapping,na.rm=TRUE,size=0.8) + scale_colour_manual(values = c("black","red")) + facet_grid(sample_1~sample_2)
 
-	p<- p + geom_vline(aes(yintercept=0),linetype=2)
+	p<- p + geom_vline(aes(xintercept=0),linetype=2)
 
 	p <- p + theme_bw() + xlab(bquote(paste(log[2],"(fold change)",sep=""))) + ylab(bquote(paste(-log[10],"(p value)",sep="")))
 
